@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) (preloaded format=pdflatex 2026.4.9)  23 SEP 2026 13:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) (preloaded format=pdflatex 2026.4.9)  26 SEP 2026 14:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -798,83 +798,34 @@ Package biblatex Info: ... file 'report.bbl' found.
  (./report.bbl)
 Package biblatex Info: Reference section=0 on input line 128.
 Package biblatex Info: Reference segment=0 on input line 128.
-<images/EPFL_logo.png, id=4, 612.3678pt x 265.2309pt>
-File: images/EPFL_logo.png Graphic file (type png)
-<use images/EPFL_logo.png>
-Package pdftex.def Info: images/EPFL_logo.png  used on input line 141.
-(pdftex.def)             Requested size: 136.57462pt x 59.1523pt.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 146.
- (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
-File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 146.
- (/usr/share/texmf/tex/latex/lm/omllmm.fd
-File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 146.
- (/usr/share/texmf/tex/latex/lm/omslmsy.fd
-File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 146.
- (/usr/share/texmf/tex/latex/lm/omxlmex.fd
-File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 146.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 146.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 146.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 146.
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-) (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
-File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 146.
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
-File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-)
+
 
 [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc} <./images/EPFL_logo.png>] (./report.toc)
-\tf@toc=\write5
-\openout5 = `report.toc'.
-
-
-
-
-pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.168 \newpage
-               [1] (./report.aux)
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+(rerunfilecheck)             Checksum: A97EDF07066F60725439A6F03856F71D;360.
 Package logreq Info: Writing requests to 'report.run.xml'.
 \openout1 = `report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 22776 strings out of 473197
- 386099 string characters out of 5718606
- 1258185 words of memory out of 5000000
- 45692 multiletter control sequences out of 15000+600000
- 603095 words of font info for 93 fonts, out of 8000000 for 9000
+ 22553 strings out of 473197
+ 381540 string characters out of 5718606
+ 1256190 words of memory out of 5000000
+ 45543 multiletter control sequences out of 15000+600000
+ 575852 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,6n,81p,1063b,805s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb>
-Output written on report.pdf (2 pages, 105941 bytes).
+ 75i,5n,81p,1063b,805s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb>
+Output written on report.pdf (1 page, 55893 bytes).
 PDF statistics:
- 38 PDF objects out of 1000 (max. 8388607)
- 25 compressed objects within 1 object stream
- 2 named destinations out of 1000 (max. 500000)
- 24582 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 40 PDF objects out of 1000 (max. 8388607)
+ 32 compressed objects within 1 object stream
+ 5 named destinations out of 1000 (max. 500000)
+ 10265 words of extra memory for PDF output out of 12000 (max. 10000000)
 
