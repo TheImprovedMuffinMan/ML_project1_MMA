@@ -49,15 +49,15 @@ def test_github_link_format():
     )
 
 
-@pytest.mark.parametrize("filename", ("README.md", "implementations.py"))
+@pytest.mark.parametrize("filename", ("README.md", "code/implementations.py"))
 def test_file_exists(filename: str, github_repo_path: pathlib.Path):
     assert (github_repo_path / filename).exists(), f"Missing file {filename}."
 
 
 def test_run_script_exists(github_repo_path: pathlib.Path):
     if (
-        not (github_repo_path / "run.py").exists()
-        and not (github_repo_path / "run.ipynb").exists()
+        not (github_repo_path / "code" / "run.py").exists()
+        and not (github_repo_path / "code" / "run.ipynb").exists()
     ):
         raise FileNotFoundError("Missing file run.py or run.ipynb.")
 

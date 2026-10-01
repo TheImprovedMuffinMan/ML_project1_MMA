@@ -16,7 +16,6 @@
 # ============================================================================ #
 # Imports
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 # ============================================================================ #
@@ -259,3 +258,82 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = compute_logistic_loss(y, tx, w_iter)  # loss without regularisation
 
     return w_iter, loss
+
+
+# ============================================================================ #
+# Cross-validation
+
+
+def build_k_indices(y, k_fold, seed):
+    """
+    build k indices for k-fold.
+        y:      shape=(N,)
+        k_fold: K in K-fold, i.e. the fold num
+        seed:   the random seed
+    Returns:
+        A 2D array of shape=(k_fold, N/k_fold) that indicates the data indices for each fold
+
+    >>> build_k_indices(np.array([1., 2., 3., 4.]), 2, 1)
+    array([[3, 2],
+           [0, 1]])
+    """
+    num_row = y.shape[0]
+    interval = int(num_row / k_fold)
+    np.random.seed(seed)
+    indices = np.random.permutation(num_row)
+    k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
+    return np.array(k_indices)
+
+
+def cross_validation_ridge(y, tx, k_indices, k, lambda_):
+    """
+    Return train and test RMSE for the k-th fold.
+    """
+
+    val_indices = k_indices[k]
+    train_indices = np.delete(k_indices, k, axis=0).flatten()
+
+    y_train = y[train_indices]
+    tx_train = tx[train_indices]
+
+    y_val = y[val_indices]
+    tx_val = tx[val_indices]
+
+    w, _ = ridge_regression(y_train, tx_train, lambda_)
+
+    rmse_tr = np.sqrt(2 * compute_loss(y_train, tx_train, w))
+    rmse_te = np.sqrt(2 * compute_loss(y_val, tx_val, w))
+
+    return rmse_tr, rmse_te
+
+
+def cross_validation_ridge_grid(y, tx, k_fold, lambdas, seed):
+    """
+    Return the best lambda and the corresponding mean train and validation
+    losses for ridge regression using k-fold cross-validation.
+    """
+
+    k_indices = build_k_indices(y, k_fold, seed)
+
+    mean_train_loss = np.zeros(len(lambdas))
+    mean_val_loss = np.zeros(len(lambdas))
+
+    for i, lambda_ in enumerate(lambdas):
+        train_losses = []
+        val_losses = []
+
+        for k in range(k_fold):
+
+            loss_tr, loss_val = cross_validation_ridge(y, tx, k_indices, k, lambda_)
+
+            train_losses.append(loss_tr)
+            val_losses.append(loss_val)
+
+        mean_train_loss[i] = np.mean(train_losses)
+        mean_val_loss[i] = np.mean(val_losses)
+
+    id = np.argmin(mean_val_loss)
+
+    best_lambda = lambdas[id]
+
+    return best_lambda, mean_train_loss, mean_val_loss
