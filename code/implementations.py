@@ -68,6 +68,7 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """
 
     w_iter = initial_w.copy()
+
     for _ in range(max_iters):
         gradient = compute_gradient(y, tx, w_iter)
         w_iter = w_iter - gamma * gradient
@@ -106,9 +107,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
 
 
 # optional code with stopping criterion for gradient descent
-def gradient_descent_stopping(
-    y, tx, initial_w, max_iters, gamma, tol, condition="gradient"
-):
+def gradient_descent_stopping(y, tx, initial_w, max_iters, gamma, tol, 
+                              condition="gradient"):
     """
     NOT REQUIRED FOR PROJECT 1
 
