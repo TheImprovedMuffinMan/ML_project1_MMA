@@ -4,7 +4,7 @@ import csv
 import numpy as np
 import os
 
-
+# ---------------------------------------------------------------------------- #
 def load_csv_data(data_path, sub_sample=False):
     """
     This function loads the data and returns the respectinve numpy arrays.
@@ -70,3 +70,88 @@ def create_csv_submission(ids, y_pred, name):
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
+
+
+# ---------------------------------------------------------------------------- #
+def find_binary_like_columns(x, feature_names,max_unique=4,rare_threshold=0.05):
+    candidates = []
+
+    for j, name in enumerate(feature_names):
+        col = x[:, j]
+
+        # Ignore NaNs
+        valid = col[~np.isnan(col)]
+
+        values, counts = np.unique(valid, return_counts=True)
+
+        # skip columns that are not binary (probably)
+        if len(values) < 2 or len(values) > max_unique:
+            continue
+
+        proportions = counts / counts.sum()
+
+        # Sort from most common to least common
+        order = np.argsort(proportions)[::-1]
+        values = values[order]
+        proportions = proportions[order]
+
+        # Yes/No dominate, the rest are rare (assumption)
+        if len(values) == 2 or np.sum(proportions[2:]) <= rare_threshold:
+            candidates.append((j, name, values, proportions))
+
+    return candidates
+
+# ---------------------------------------------------------------------------- #
+def encode_binary_columns(x_train, x_test, feature_names, binary_specs):
+    train_columns = []
+    test_columns = []
+    new_feature_names = []
+
+    for j, name in enumerate(feature_names):
+        train_col = x_train[:, j]
+        test_col = x_test[:, j]
+
+        # Leave columns not in BINARY_SPECS unchanged
+        if name not in binary_specs:
+            train_columns.append(train_col)
+            test_columns.append(test_col)
+            new_feature_names.append(name)
+            continue
+
+        spec = binary_specs[name]
+
+        positive = spec["positive"]
+        negative = spec["negative"]
+        unknown = spec["unknown"]
+
+        # Check for unexpected values
+        allowed = positive + negative + unknown
+
+        train_values = np.unique(train_col[~np.isnan(train_col)])
+
+        unexpected = train_values[~np.isin(train_values, allowed)]
+
+        if len(unexpected) > 0:
+            raise ValueError(f"{name}: unexpected values {unexpected}")
+
+        # Main binary column
+        train_binary = np.isin(train_col, positive).astype(float)
+
+        test_binary = np.isin(test_col, positive).astype(float)
+
+        # Unknown / refused / missing column
+        train_unknown = (np.isin(train_col, unknown) | np.isnan(train_col)
+                        ).astype(float)
+
+        test_unknown = (np.isin(test_col, unknown) | np.isnan(test_col)
+                       ).astype(float)
+
+        train_columns.extend([train_binary,train_unknown])
+
+        test_columns.extend([test_binary,test_unknown])
+
+        new_feature_names.extend([f"{name}_positive", f"{name}_unknown"])
+
+    return (np.column_stack(train_columns),
+            np.column_stack(test_columns),
+            np.array(new_feature_names))
