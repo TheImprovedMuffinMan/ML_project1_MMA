@@ -107,8 +107,9 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
 
 
 # optional code with stopping criterion for gradient descent
-def gradient_descent_stopping(y, tx, initial_w, max_iters, gamma, tol, 
-                              condition="gradient"):
+def gradient_descent_stopping(
+    y, tx, initial_w, max_iters, gamma, tol, condition="gradient"
+):
     """
     NOT REQUIRED FOR PROJECT 1
 
