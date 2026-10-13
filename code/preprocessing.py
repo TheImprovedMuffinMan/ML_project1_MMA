@@ -6,7 +6,10 @@ import numpy as np
 import categories as cat
 from pathlib import Path
 import importlib
+
 importlib.reload(cat)
+
+
 # ============================================================================ #
 # Load feature names
 def load_names(x_train_path):
@@ -309,32 +312,16 @@ def one_hot_encode_columns(x_train, x_test, feature_names, specs):
     )
 
 
-def scale_features(
-    x_train,
-    x_test,
-    feature_names,
-    features_to_scale,
-):
+def scale_features(x_train, x_test, feature_names, features_to_scale):
     """
-    Standardise selected features using statistics from the training set only.
+    Standardise selected features using training statistics.
 
-    For each selected feature:
-        x_scaled = (x - mean_train) / std_train
+    If a feature has a corresponding <feature>_unknown column:
+        - calculate mean/std using known training observations only
+        - scale known observations
+        - keep unknown observations at 0
 
-    Binary and one-hot encoded columns can simply be left out of
-    features_to_scale.
-
-    Args:
-        x_train: np.ndarray, shape (N_train, D)
-        x_test: np.ndarray, shape (N_test, D)
-        feature_names: np.ndarray/list of length D
-        features_to_scale: iterable of feature names to standardise
-
-    Returns:
-        x_train_scaled: scaled copy of x_train
-        x_test_scaled: scaled copy of x_test
-        means: dict of training means for scaled features
-        stds: dict of training standard deviations for scaled features
+    Otherwise, scale the entire column normally.
     """
 
     x_train_scaled = x_train.copy().astype(float)
@@ -350,16 +337,47 @@ def scale_features(
 
         j = np.where(feature_names == name)[0][0]
 
-        mean = np.mean(x_train[:, j])
-        std = np.std(x_train[:, j])
+        unknown_name = f"{name}_unknown"
 
-        # Avoid division by zero for constant columns
-        if std == 0:
-            std = 1.0
+        # ------------------------------------------------------------
+        # Feature has an unknown indicator
+        if unknown_name in feature_names:
 
-        x_train_scaled[:, j] = (x_train[:, j] - mean) / std
+            j_unknown = np.where(feature_names == unknown_name)[0][0]
 
-        x_test_scaled[:, j] = (x_test[:, j] - mean) / std
+            train_known = x_train[:, j_unknown] == 0
+            test_known = x_test[:, j_unknown] == 0
+
+            # Learn statistics from known training values only
+            mean = np.mean(x_train[train_known, j])
+            std = np.std(x_train[train_known, j])
+
+            if std == 0:
+                std = 1.0
+
+            # Unknown values remain 0
+            x_train_scaled[:, j] = 0.0
+            x_test_scaled[:, j] = 0.0
+
+            # Scale only known observations
+            x_train_scaled[train_known, j] = (x_train[train_known, j] - mean) / std
+
+            x_test_scaled[test_known, j] = (x_test[test_known, j] - mean) / std
+
+        # ------------------------------------------------------------
+        # Normal feature without unknown indicator
+        # ------------------------------------------------------------
+        else:
+
+            mean = np.mean(x_train[:, j])
+            std = np.std(x_train[:, j])
+
+            if std == 0:
+                std = 1.0
+
+            x_train_scaled[:, j] = (x_train[:, j] - mean) / std
+
+            x_test_scaled[:, j] = (x_test[:, j] - mean) / std
 
         means[name] = mean
         stds[name] = std

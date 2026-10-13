@@ -263,8 +263,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
 # ============================================================================ #
 # Cross-validation
-
-
 def build_k_indices(y, k_fold, seed):
     """
     build k indices for k-fold.
@@ -302,17 +300,13 @@ def cross_validation_ridge(y, tx, k_indices, k, lambda_):
 
     w, _ = ridge_regression(y_train, tx_train, lambda_)
 
-    rmse_tr = np.sqrt(2 * compute_loss(y_train, tx_train, w))
-    rmse_te = np.sqrt(2 * compute_loss(y_val, tx_val, w))
+    loss_tr = compute_loss(y_train, tx_train, w)
+    loss_val = compute_loss(y_val, tx_val, w)
 
-    return rmse_tr, rmse_te
+    return loss_tr, loss_val
 
 
 def cross_validation_ridge_grid(y, tx, k_fold, lambdas, seed):
-    """
-    Return the best lambda and the corresponding mean train and validation
-    losses for ridge regression using k-fold cross-validation.
-    """
 
     k_indices = build_k_indices(y, k_fold, seed)
 
@@ -320,6 +314,7 @@ def cross_validation_ridge_grid(y, tx, k_fold, lambdas, seed):
     mean_val_loss = np.zeros(len(lambdas))
 
     for i, lambda_ in enumerate(lambdas):
+
         train_losses = []
         val_losses = []
 
