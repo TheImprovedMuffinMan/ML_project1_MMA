@@ -194,7 +194,6 @@ def ridge_regression(y, tx, lambda_):
 # ============================================================================ #
 # Logistic regression
 
-
 def sigmoid(t):
     """Compute the sigmoid function."""
     return 1 / (1 + np.exp(-t))
@@ -262,7 +261,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
 
 # ============================================================================ #
-# Cross-validation
+# Cross-validation for ridge regression
 def build_k_indices(y, k_fold, seed):
     """
     build k indices for k-fold.
@@ -321,6 +320,58 @@ def cross_validation_ridge_grid(y, tx, k_fold, lambdas, seed):
         for k in range(k_fold):
 
             loss_tr, loss_val = cross_validation_ridge(y, tx, k_indices, k, lambda_)
+
+            train_losses.append(loss_tr)
+            val_losses.append(loss_val)
+
+        mean_train_loss[i] = np.mean(train_losses)
+        mean_val_loss[i] = np.mean(val_losses)
+
+    id = np.argmin(mean_val_loss)
+
+    best_lambda = lambdas[id]
+
+    return best_lambda, mean_train_loss, mean_val_loss
+
+# ============================================================================ #
+# Cross validation for regularized logistic regression
+def cross_validation_logistic(y, tx, k_indices, k, lambda_, gamma = 0.01, max_iters = 1000):
+    """
+    Return train and test loss for the k-th fold.
+    """
+
+    val_indices = k_indices[k]
+    train_indices = np.delete(k_indices, k, axis=0).flatten()
+
+    y_train = y[train_indices]
+    tx_train = tx[train_indices]
+
+    y_val = y[val_indices]
+    tx_val = tx[val_indices]
+
+    initial_w = np.zeros(tx.shape[1])
+    w, _ = reg_logistic_regression(y_train, tx_train, lambda_, initial_w, max_iters = max_iters, gamma = gamma)
+
+    loss_tr = compute_logistic_loss(y_train, tx_train, w)
+    loss_val = compute_logistic_loss(y_val, tx_val, w)
+
+    return loss_tr, loss_val
+
+def cross_validation_logistic_grid(y, tx, k_fold, lambdas, seed, gamma = 0.01, max_iters = 1000):
+
+    k_indices = build_k_indices(y, k_fold, seed)
+
+    mean_train_loss = np.zeros(len(lambdas))
+    mean_val_loss = np.zeros(len(lambdas))
+
+    for i, lambda_ in enumerate(lambdas):
+
+        train_losses = []
+        val_losses = []
+
+        for k in range(k_fold):
+
+            loss_tr, loss_val = cross_validation_logistic(y, tx, k_indices, k, lambda_, gamma = gamma, max_iters = max_iters)
 
             train_losses.append(loss_tr)
             val_losses.append(loss_val)
