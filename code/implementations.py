@@ -384,3 +384,24 @@ def cross_validation_logistic_grid(y, tx, k_fold, lambdas, seed, gamma = 0.01, m
     best_lambda = lambdas[id]
 
     return best_lambda, mean_train_loss, mean_val_loss
+
+# ============================================================================ #
+def classification_metrics(y, y_pred):
+
+    tp = np.sum((y == 1) & (y_pred == 1))
+    tn = np.sum((y == -1) & (y_pred == -1))
+    fp = np.sum((y == -1) & (y_pred == 1))
+    fn = np.sum((y == 1) & (y_pred == -1))
+
+    accuracy = (tp + tn) / len(y)
+
+    precision = tp / (tp + fp) if tp + fp > 0 else 0
+    recall = tp / (tp + fn) if tp + fn > 0 else 0
+
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if precision + recall > 0
+        else 0
+    )
+
+    return accuracy, precision, recall, f1
