@@ -386,6 +386,22 @@ def scale_features(x_train, x_test, feature_names, features_to_scale):
 
 
 # ============================================================================ #
+# Bias term
+
+
+def add_bias(x_train, x_test, feature_names):
+    """
+    Prepend a constant column of ones to train and test so that linear and
+    logistic models can learn an intercept.
+    """
+    x_train = np.column_stack([np.ones(x_train.shape[0]), x_train])
+    x_test = np.column_stack([np.ones(x_test.shape[0]), x_test])
+    feature_names = np.concatenate([["bias"], feature_names])
+
+    return x_train, x_test, feature_names
+
+
+# ============================================================================ #
 # Complete preprocessing
 def clean_data(x_train, x_test):
 
@@ -433,6 +449,9 @@ def clean_data(x_train, x_test):
     x_train, x_test, _, _ = scale_features(
         x_train, x_test, feature_names, cat.FEATURES_TO_SCALE
     )
+
+    # Bias term: constant column of ones (added after scaling, never scaled)
+    x_train, x_test, feature_names = add_bias(x_train, x_test, feature_names)
 
     return x_train, x_test, feature_names
 
