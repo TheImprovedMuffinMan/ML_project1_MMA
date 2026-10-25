@@ -68,7 +68,7 @@ COLS_REDUNDANT = [
     "WTKG3",
     "_BMI5CAT",
     "_RFBMI5",
-    "HEIGHT2"
+    "HEIGHT2",
     # Âge -> on garde _AGE80
     "_AGE65YR",
     "_AGE_G",

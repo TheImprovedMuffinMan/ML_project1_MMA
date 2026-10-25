@@ -166,8 +166,11 @@ def least_squares(y, tx):
 
     returns: optimal weight and loss value
     """
-    w = np.linalg.solve(tx.T @ tx, tx.T @ y)
-    y_pred = tx @ w
+    A, b = tx.T @ tx, tx.T @ y       
+    try:
+        w = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        w = np.linalg.pinv(A) @ b
     loss = compute_loss(y, tx, w)
     return w, loss
 
@@ -185,7 +188,12 @@ def ridge_regression(y, tx, lambda_):
     N, D = tx.shape
     lambda_prime = 2 * N * lambda_
 
-    w = np.linalg.solve(tx.T @ tx + lambda_prime * np.eye(D), tx.T @ y)
+    A, b = tx.T @ tx + lambda_prime * np.eye(D), tx.T @ y
+    try:
+        w = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        w = np.linalg.pinv(A) @ b
+        
     loss = compute_loss(y, tx, w)
 
     return w, loss
@@ -405,3 +413,58 @@ def classification_metrics(y, y_pred):
     )
 
     return accuracy, precision, recall, f1
+
+# ============================================================================ #
+# Cross validation for F1
+
+DEFAULT_THRESHOLDS = np.arange(0.05, 0.55, 0.025)
+
+def f1_for_thresholds(y, scores, thresholds=DEFAULT_THRESHOLDS):
+    """F1 for the rule 'score >= t' for every t."""
+    return np.array(
+        [
+            classification_metrics(y, np.where(scores >= t, 1, -1))[3]
+            for t in thresholds
+        ]
+    )
+ 
+def tune_threshold(y, scores, thresholds=DEFAULT_THRESHOLDS):
+    """Return (best_threshold, best_f1) on the given validation data."""
+    f1s = f1_for_thresholds(y, scores, thresholds)
+    best = int(np.argmax(f1s))
+    return thresholds[best], f1s[best]
+
+def cross_validation_f1(y, tx, folds, fit_fn, score_fn, thresholds=DEFAULT_THRESHOLDS):
+    """
+    y: {-1, 1} labels, tx: features, folds: list of index arrays
+    fit_fn(y_train, tx_train) -> w          (convert labels inside if needed)
+    score_fn(tx_val, w)       -> scores
+ 
+    Returns (mean_f1, std_f1): arrays of length len(thresholds), computed over folds.
+    The same threshold is used in every fold.
+    """
+    f1 = np.zeros((len(folds), len(thresholds)))
+    for k, val in enumerate(folds):
+        train = np.concatenate([f for i, f in enumerate(folds) if i != k])
+        w = fit_fn(y[train], tx[train])
+        f1[k] = f1_for_thresholds(y[val], score_fn(tx[val], w), thresholds)
+    return f1.mean(axis=0), f1.std(axis=0)
+ 
+def grid_search_f1(
+    y, tx, folds, params, make_fit_fn, score_fn, thresholds=DEFAULT_THRESHOLDS
+):
+    """
+    Choose a hyper-parameter (lambda, gamma, ...) AND a threshold by mean CV F1.
+ 
+    params:      list of hyper-parameter values
+    make_fit_fn: p -> fit_fn(y_train, tx_train) -> w
+    Returns (best_param, best_threshold, best_f1, table)
+    where table[i, j] = mean CV F1 for params[i] and thresholds[j].
+    """
+    table = np.zeros((len(params), len(thresholds)))
+    for i, p in enumerate(params):
+        table[i], _ = cross_validation_f1(
+            y, tx, folds, make_fit_fn(p), score_fn, thresholds
+        )
+    i, j = np.unravel_index(np.argmax(table), table.shape)
+    return params[i], thresholds[j], table[i, j], table
