@@ -468,3 +468,47 @@ def grid_search_f1(
         )
     i, j = np.unravel_index(np.argmax(table), table.shape)
     return params[i], thresholds[j], table[i, j], table
+
+def build_stratified_k_indices(y, k_fold, seed):
+    """
+    k folds with (almost) the same proportion of positives in each.
+ 
+    y: labels in {-1, 1} (or {0, 1}); positives are the entries equal to 1.
+    Returns a LIST of k index arrays (folds have slightly different sizes, so this
+    is not a rectangular 2D array like build_k_indices).
+    """
+    rng = np.random.RandomState(seed)
+    pos = rng.permutation(np.where(y == 1)[0])
+    neg = rng.permutation(np.where(y != 1)[0])
+    return [
+        np.concatenate([p, n])
+        for p, n in zip(np.array_split(pos, k_fold), np.array_split(neg, k_fold))
+    ]
+ 
+# (Regularised) logistic regression: F1 for several numbers of iterations at once
+def cross_validation_f1_logistic_path(
+    y, tx, folds, gamma, checkpoints, lambda_=0.0, thresholds=DEFAULT_THRESHOLDS
+):
+    """
+    Mean CV F1 of (regularised) logistic regression for ONE gamma and several numbers
+    of iterations, from a single training run per fold.
+ 
+    Gradient descent has no state except w, so running 100 + 200 + 700 iterations in
+    blocks (warm start) gives exactly the same w as 1000 iterations in one go.
+    y: labels in {-1, 1}; folds: list of index arrays;
+    checkpoints: increasing list of iteration counts, e.g. [100, 300, 1000].
+    Returns an array of shape (len(checkpoints), len(thresholds)).
+    """
+    f1 = np.zeros((len(folds), len(checkpoints), len(thresholds)))
+    blocks = np.diff([0] + list(checkpoints))
+    for k, val in enumerate(folds):
+        train = np.concatenate([f for i, f in enumerate(folds) if i != k])
+        y_tr = (y[train] == 1).astype(float)
+        w = np.zeros(tx.shape[1])
+        for c, n_iter in enumerate(blocks):
+            if lambda_ > 0:
+                w, _ = reg_logistic_regression(y_tr, tx[train], lambda_, w, n_iter, gamma)
+            else:
+                w, _ = logistic_regression(y_tr, tx[train], w, n_iter, gamma)
+            f1[k, c] = f1_for_thresholds(y[val], sigmoid(tx[val] @ w), thresholds)
+    return f1.mean(axis=0)

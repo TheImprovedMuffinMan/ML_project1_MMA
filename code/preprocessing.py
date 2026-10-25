@@ -402,6 +402,42 @@ def add_bias(x_train, x_test, feature_names):
 
 
 # ============================================================================ #
+# Linearly dependent columns
+ 
+ 
+def drop_dependent_columns(x_train, x_test, feature_names, tol=1e-9):
+    """
+    Remove every column that is an exact linear combination of the columns before it
+    (identical *_unknown indicators, complementary indicator sets, ... ).
+    Returns:
+        x_train, x_test, kept_feature_names, removed_feature_names
+    """
+    G = x_train.T @ x_train / x_train.shape[0]
+    kept = []
+ 
+    for j in range(G.shape[0]):
+        if kept:
+            coef = np.linalg.solve(G[np.ix_(kept, kept)], G[kept, j])
+            residual = G[j, j] - G[kept, j] @ coef
+        else:
+            residual = G[j, j]
+ 
+        if G[j, j] > 0 and residual > tol * G[j, j]:
+            kept.append(j)
+ 
+    kept = np.array(kept)
+    removed = np.setdiff1d(np.arange(G.shape[0]), kept)
+ 
+    return (
+        x_train[:, kept],
+        x_test[:, kept],
+        feature_names[kept],
+        feature_names[removed],
+    )
+
+
+
+# ============================================================================ #
 # Complete preprocessing
 def clean_data(x_train, x_test):
 
@@ -452,6 +488,16 @@ def clean_data(x_train, x_test):
 
     # Bias term: constant column of ones (added after scaling, never scaled)
     x_train, x_test, feature_names = add_bias(x_train, x_test, feature_names)
+
+
+    # Remove linearly dependent columns (done after the bias is added, so that
+    # dependencies involving the constant column are detected; the bias is column 0
+    # and is therefore always kept)
+    x_train, x_test, feature_names, removed = drop_dependent_columns(
+        x_train, x_test, feature_names
+    )
+    if len(removed) > 0:
+        print(f"Removed {len(removed)} linearly dependent columns: {list(removed)}")
 
     return x_train, x_test, feature_names
 
