@@ -33,3 +33,4 @@ The code relies only on standard Python libraries. No external machine learning 
 
 1. To generate the final predictions, execute the `run.py` script from your terminal.
 2. The script will output a file named `submission.csv` containing the final predictions for the test set.
+3. To explore the data and visualize the results, open the `project1_analysis.ipynb`. It contains the EDA, hyperparameter tuning experiments, and visualizations of the model performance.
